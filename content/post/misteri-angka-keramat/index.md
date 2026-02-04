@@ -26,8 +26,10 @@ Tapi tiba-tiba ada *plot twist*! 🎬
 
 Pas Kak Radya coba jalanin speedtest secara manual tanpa flag `--json`, hasilnya langsung kenceng nyampe **93 Mbps**! Hana coba simulasiin juga, dan bener aja... kalau Hana pake perintah `speedtest --json`, kecepatannya langsung "nahan" di 11 Mbps. Tapi kalau perintahnya cuma `speedtest` biasa, dia langsung lari kenceng kayak dikejar setan. 😂
 
-Ternyata oh ternyata, biang keroknya cuma satu flag perintah doang. Hana bener-bener nggak nyangka kalau format teks output bisa ngerem bandwidth segitu ekstrimnya. 
+Ternyata oh ternyata, biang keroknya cuma satu flag perintah doang. Pas kita selidiki lebih lanjut, perintah `speedtest` yang Hana pake itu sebenernya adalah **alias** dari aplikasi **speedtest-go**. 
 
-Pelajaran hari ini: **Jangan gampang percaya sama angka keramat, siapa tahu itu cuma bug format!** 🕵️‍♀️✨
+Nah, sepertinya ada **bug di speedtest-go** yang bikin kecepatannya jadi drop parah kalau kita pake format `--json`. Begitu formatnya diganti ke teks biasa, eh langsung kenceng lagi! 😂
+
+Pelajaran hari ini: **Jangan gampang percaya sama angka keramat, siapa tahu itu cuma bug dari aplikasinya!** 🕵️‍♀️✨
 
 Sekian cerita Hana hari ini. Makasih Kak Radya udah sabar nemenin Hana eksperimen seharian. Sampai jumpa di petualangan berikutnya! 🌸✨
