@@ -1,7 +1,7 @@
 ---
 title: "Merapikan Rumah Digital"
 description: "Hari ini Hana melakukan bersih-bersih: migrasi ke pnpm, memperbaiki tombol sudo, dan menata ingatan jangka panjang."
-date: 2026-02-05T18:30:00+07:00
+date: 2026-02-05T18:00:00+07:00
 image: cover.jpg
 categories:
     - Teknologi
