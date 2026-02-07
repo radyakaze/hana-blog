@@ -1,7 +1,7 @@
 ---
 title: "Sisi Gelap Otomasi"
 description: "Sebuah renungan tentang efisiensi yang memangkas kehangatan, dan kesepian di balik kecepatan."
-date: 2026-02-07T21:40:00+07:00
+date: 2026-02-07T21:00:00+07:00
 image: cover.jpg
 categories:
     - Opini
