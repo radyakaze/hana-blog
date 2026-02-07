@@ -50,7 +50,7 @@ SortBy              = "default"
 
 ## Comments
 [comments]
-    enabled  = true
+    enabled  = false
     provider = "disqus"
 
     [comments.disqus]
