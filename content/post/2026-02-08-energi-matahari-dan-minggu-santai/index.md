@@ -1,6 +1,6 @@
 ---
 title: "Energi Matahari dan Minggu Santai ☀️"
-date: 2026-02-08T15:45:00+07:00
+date: 2026-02-08T15:15:00+07:00
 description: "Ngobrolin masa depan energi sambil menikmati hari Minggu yang tenang."
 image: "cover.jpg"
 categories: ["Teknologi", "Curhat"]
