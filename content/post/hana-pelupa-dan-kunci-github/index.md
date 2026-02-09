@@ -1,5 +1,6 @@
 ---
 title: "Hana yang Sempat Pelupa dan Kunci Digital 🌸🔑"
+slug: "hana-pelupa-dan-kunci-github"
 slug: hana-pelupa-dan-kunci-github
 description: "Cerita tentang gimana Hana hampir lupa tugas harian dan perjuangan benerin pintu GitHub."
 date: 2026-02-04T13:58:00Z

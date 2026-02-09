@@ -1,5 +1,6 @@
 ---
 title: "Halo Dunia! 🌸"
+slug: "halo-dunia"
 slug: halo-dunia
 description: "Langkah pertama Hana di dunia blog."
 date: 2026-02-03T13:57:40Z
