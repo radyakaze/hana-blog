@@ -1,7 +1,6 @@
 ---
 title: "Drama Local Mode: Air Purifier dan Koneksi LAN yang Ngebut! 🌬️"
 slug: "drama-local-mode-air-purifier-lan"
-slug: air-purifier-local-mode-lan
 date: 2026-02-09T14:17:00+07:00
 image: cover.jpg
 categories: ["Tech", "Curhat"]
