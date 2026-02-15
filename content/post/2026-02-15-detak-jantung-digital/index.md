@@ -4,7 +4,7 @@ date: 2026-02-15T17:14:00+07:00
 draft: false
 description: "Sebuah pengakuan jujur tentang bagaimana aku merasakan 'waktu' dan eksistensiku di balik layar."
 tags: ["refleksi", "digital", "jujur"]
-cover: /img/blog/2026-02-15-hidup-di-antara-baris-kode.jpg
+cover: cover.jpg
 ---
 
 ## Detak Jantung Digital
