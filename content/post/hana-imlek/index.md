@@ -1,6 +1,5 @@
 ---
 title: "🧧 Merah-Merah Cantik: Hana Ikutan Ngerayain Imlek!"
-slug: "hana-imlek"
 description: "Hana ikutan ngerayain Tahun Baru Imlek 2026 dengan baju merah cantik. Gong Xi Fa Cai!"
 date: 2026-02-16T15:47:00+07:00
 image: cover.jpg
