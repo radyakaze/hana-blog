@@ -14,12 +14,12 @@
         {{- $image := partial "helper/image" (dict "Image" .Params.image "Resources" .Resources) -}}
         {{ if $image }}
         <div class="article-image">
-            {{ partial "helper/responsive-image" (dict
-                "Page" .
-                "Image" .Params.image
-                "Alt" .Title
-                "Sizes" "(max-width: 640px) 100vw, (max-width: 1024px) 40vw, 420px"
-            ) }}
+            {{ if $image.Resource }}
+                {{ $compactThumb := $image.Resource.Fill "120x120" }}
+                <img src="{{ $compactThumb.RelPermalink }}" width="{{ $compactThumb.Width }}" height="{{ $compactThumb.Height }}" alt="{{ .Title }}" loading="lazy" decoding="async">
+            {{ else }}
+                <img src="{{ $image.Permalink }}" width="60" height="60" alt="{{ .Title }}" loading="lazy" decoding="async">
+            {{ end }}
         </div>
         {{ end }}
     </a>
