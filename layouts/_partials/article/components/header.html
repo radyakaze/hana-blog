@@ -1,9 +1,11 @@
 {{- $page := . -}}
 {{- $isFirst := false -}}
+{{- $isDetail := not (reflect.IsMap .) -}}
 {{- if reflect.IsMap . -}}
     {{- with index . "context" }}{{ $page = . }}{{ end -}}
     {{- with index . "isFirst" }}{{ $isFirst = . }}{{ end -}}
 {{- end -}}
+{{- $priority := or $isFirst $isDetail -}}
 
 <header class="article-header">
     {{- $image := partial "helper/image" (dict "Image" $page.Params.image "Resources" $page.Resources) -}}
@@ -15,7 +17,7 @@
                 "Image" $page.Params.image
                 "Alt" (printf "Featured image of post %s" $page.Title)
                 "Sizes" "(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1024px"
-                "Priority" $isFirst
+                "Priority" $priority
             ) }}
         </a>
     </div>
