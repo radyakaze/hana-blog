@@ -1,0 +1,17 @@
+<header class="article-header">
+    {{- $image := partial "helper/image" (dict "Image" .Params.image "Resources" .Resources) -}}
+    {{ if $image }}
+    <div class="article-image">
+        <a href="{{ .RelPermalink }}">
+            {{ partial "picture" (dict
+                "ctx" .
+                "src" .Params.image
+                "alt" (printf "Featured image of post %s" .Title)
+                "sizes" "(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1024px"
+            ) }}
+        </a>
+    </div>
+    {{ end }}
+
+    {{ partialCached "article/components/details" . .RelPermalink }}
+</header>
