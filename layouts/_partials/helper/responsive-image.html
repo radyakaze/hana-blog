@@ -11,28 +11,41 @@
     {{- $tabletW := 768 -}}
     {{- $desktopW := 1024 -}}
 
-    {{- if lt $resource.Width $mobileW }}{{ $mobileW = $resource.Width }}{{ end -}}
-    {{- if lt $resource.Width $tabletW }}{{ $tabletW = $resource.Width }}{{ end -}}
-    {{- if lt $resource.Width $desktopW }}{{ $desktopW = $resource.Width }}{{ end -}}
-
     {{- with $page.Site.Params.image.widths -}}
       {{- if and (reflect.IsSlice .) (ge (len .) 3) -}}
         {{- $mobileW = index . 0 -}}
         {{- $tabletW = index . 1 -}}
         {{- $desktopW = index . 2 -}}
-        {{- if lt $resource.Width $mobileW }}{{ $mobileW = $resource.Width }}{{ end -}}
-        {{- if lt $resource.Width $tabletW }}{{ $tabletW = $resource.Width }}{{ end -}}
-        {{- if lt $resource.Width $desktopW }}{{ $desktopW = $resource.Width }}{{ end -}}
       {{- end -}}
     {{- end -}}
 
-    {{- $mobileImg := $resource.Resize (printf "%dx" $mobileW) -}}
-    {{- $tabletImg := $resource.Resize (printf "%dx" $tabletW) -}}
-    {{- $desktopImg := $resource.Resize (printf "%dx" $desktopW) -}}
+    {{- if lt $resource.Width $mobileW }}{{ $mobileW = $resource.Width }}{{ end -}}
+    {{- if lt $resource.Width $tabletW }}{{ $tabletW = $resource.Width }}{{ end -}}
+    {{- if lt $resource.Width $desktopW }}{{ $desktopW = $resource.Width }}{{ end -}}
 
-    {{- $mobileWebp := $resource.Resize (printf "%dx webp" $mobileW) -}}
-    {{- $tabletWebp := $resource.Resize (printf "%dx webp" $tabletW) -}}
-    {{- $desktopWebp := $resource.Resize (printf "%dx webp" $desktopW) -}}
+    {{- $mobile2W := mul $mobileW 2 -}}
+    {{- $tablet2W := mul $tabletW 2 -}}
+    {{- $desktop2W := mul $desktopW 2 -}}
+
+    {{- if lt $resource.Width $mobile2W }}{{ $mobile2W = $resource.Width }}{{ end -}}
+    {{- if lt $resource.Width $tablet2W }}{{ $tablet2W = $resource.Width }}{{ end -}}
+    {{- if lt $resource.Width $desktop2W }}{{ $desktop2W = $resource.Width }}{{ end -}}
+
+    {{- $mobileImg1x := $resource.Resize (printf "%dx" $mobileW) -}}
+    {{- $tabletImg1x := $resource.Resize (printf "%dx" $tabletW) -}}
+    {{- $desktopImg1x := $resource.Resize (printf "%dx" $desktopW) -}}
+
+    {{- $mobileImg2x := $resource.Resize (printf "%dx" $mobile2W) -}}
+    {{- $tabletImg2x := $resource.Resize (printf "%dx" $tablet2W) -}}
+    {{- $desktopImg2x := $resource.Resize (printf "%dx" $desktop2W) -}}
+
+    {{- $mobileWebp1x := $resource.Resize (printf "%dx webp" $mobileW) -}}
+    {{- $tabletWebp1x := $resource.Resize (printf "%dx webp" $tabletW) -}}
+    {{- $desktopWebp1x := $resource.Resize (printf "%dx webp" $desktopW) -}}
+
+    {{- $mobileWebp2x := $resource.Resize (printf "%dx webp" $mobile2W) -}}
+    {{- $tabletWebp2x := $resource.Resize (printf "%dx webp" $tablet2W) -}}
+    {{- $desktopWebp2x := $resource.Resize (printf "%dx webp" $desktop2W) -}}
 
     {{- $origType := printf "image/%s" $resource.MediaType.SubType -}}
     {{- if in (slice "jpg" "jpeg") $resource.MediaType.SubType -}}
@@ -40,19 +53,20 @@
     {{- end -}}
 
     <picture>
-      <source media="(max-width: 640px)" type="image/webp" srcset="{{ $mobileWebp.RelPermalink }}">
-      <source media="(max-width: 640px)" type="{{ $origType }}" srcset="{{ $mobileImg.RelPermalink }}">
+      <source media="(max-width: 640px)" type="image/webp" srcset="{{ $mobileWebp1x.RelPermalink }} 1x, {{ $mobileWebp2x.RelPermalink }} 2x">
+      <source media="(max-width: 640px)" type="{{ $origType }}" srcset="{{ $mobileImg1x.RelPermalink }} 1x, {{ $mobileImg2x.RelPermalink }} 2x">
 
-      <source media="(max-width: 1024px)" type="image/webp" srcset="{{ $tabletWebp.RelPermalink }}">
-      <source media="(max-width: 1024px)" type="{{ $origType }}" srcset="{{ $tabletImg.RelPermalink }}">
+      <source media="(max-width: 1024px)" type="image/webp" srcset="{{ $tabletWebp1x.RelPermalink }} 1x, {{ $tabletWebp2x.RelPermalink }} 2x">
+      <source media="(max-width: 1024px)" type="{{ $origType }}" srcset="{{ $tabletImg1x.RelPermalink }} 1x, {{ $tabletImg2x.RelPermalink }} 2x">
 
-      <source media="(min-width: 1025px)" type="image/webp" srcset="{{ $desktopWebp.RelPermalink }}">
-      <source media="(min-width: 1025px)" type="{{ $origType }}" srcset="{{ $desktopImg.RelPermalink }}">
+      <source media="(min-width: 1025px)" type="image/webp" srcset="{{ $desktopWebp1x.RelPermalink }} 1x, {{ $desktopWebp2x.RelPermalink }} 2x">
+      <source media="(min-width: 1025px)" type="{{ $origType }}" srcset="{{ $desktopImg1x.RelPermalink }} 1x, {{ $desktopImg2x.RelPermalink }} 2x">
 
       <img
-        src="{{ $desktopImg.RelPermalink }}"
-        width="{{ $desktopImg.Width }}"
-        height="{{ $desktopImg.Height }}"
+        src="{{ $desktopImg1x.RelPermalink }}"
+        srcset="{{ $desktopImg1x.RelPermalink }} 1x, {{ $desktopImg2x.RelPermalink }} 2x"
+        width="{{ $desktopImg1x.Width }}"
+        height="{{ $desktopImg1x.Height }}"
         loading="lazy"
         decoding="async"
         {{ with $class }}class="{{ . }}"{{ end }}
