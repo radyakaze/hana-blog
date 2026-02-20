@@ -1,17 +1,25 @@
+{{- $page := . -}}
+{{- $isFirst := false -}}
+{{- if reflect.IsMap . -}}
+    {{- with index . "context" }}{{ $page = . }}{{ end -}}
+    {{- with index . "isFirst" }}{{ $isFirst = . }}{{ end -}}
+{{- end -}}
+
 <header class="article-header">
-    {{- $image := partial "helper/image" (dict "Image" .Params.image "Resources" .Resources) -}}
+    {{- $image := partial "helper/image" (dict "Image" $page.Params.image "Resources" $page.Resources) -}}
     {{ if $image }}
     <div class="article-image">
-        <a href="{{ .RelPermalink }}">
+        <a href="{{ $page.RelPermalink }}">
             {{ partial "helper/responsive-image" (dict
-                "Page" .
-                "Image" .Params.image
-                "Alt" (printf "Featured image of post %s" .Title)
+                "Page" $page
+                "Image" $page.Params.image
+                "Alt" (printf "Featured image of post %s" $page.Title)
                 "Sizes" "(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1024px"
+                "Priority" $isFirst
             ) }}
         </a>
     </div>
     {{ end }}
 
-    {{ partialCached "article/components/details" . .RelPermalink }}
+    {{ partialCached "article/components/details" $page $page.RelPermalink }}
 </header>

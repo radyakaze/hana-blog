@@ -8,6 +8,13 @@
     {{ $tileH = int (index $sizeParts 1) }}
 {{ end }}
 {{ $isFixedTile := in (slice "articleList" "section" "taxonomy") .Type }}
+{{ $isFirst := .isFirst | default false }}
+{{ $loading := "lazy" }}
+{{ $fetchPriority := "auto" }}
+{{ if $isFirst }}
+    {{ $loading = "eager" }}
+    {{ $fetchPriority = "high" }}
+{{ end }}
 
 <article class="{{ if $image }}has-image{{ end }}">
     <a href="{{ .context.RelPermalink }}">
@@ -21,18 +28,20 @@
                     srcset="{{ $thumb1x.RelPermalink }} 1x, {{ $thumb2x.RelPermalink }} 2x"
                     width="{{ $tileW }}"
                     height="{{ $tileH }}"
-                    loading="lazy"
+                    loading="{{ $loading }}"
+                    fetchpriority="{{ $fetchPriority }}"
                     decoding="async"
                     alt="Featured image of post {{ .context.Title }}"
                 >
             {{ else if $isFixedTile }}
-                <img src="{{ $image.Permalink }}" width="{{ $tileW }}" height="{{ $tileH }}" loading="lazy" decoding="async" alt="Featured image of post {{ .context.Title }}">
+                <img src="{{ $image.Permalink }}" width="{{ $tileW }}" height="{{ $tileH }}" loading="{{ $loading }}" fetchpriority="{{ $fetchPriority }}" decoding="async" alt="Featured image of post {{ .context.Title }}">
             {{ else }}
                 {{ partial "helper/responsive-image" (dict
                     "Page" .context
                     "Image" .context.Params.image
                     "Alt" (printf "Featured image of post %s" .context.Title)
                     "Sizes" "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 640px"
+                    "Priority" $isFirst
                 ) }}
             {{ end }}
         </div>

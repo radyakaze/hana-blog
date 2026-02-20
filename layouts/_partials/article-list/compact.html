@@ -1,17 +1,30 @@
+{{- $page := . -}}
+{{- $isFirst := false -}}
+{{- if reflect.IsMap . -}}
+    {{- with index . "context" }}{{ $page = . }}{{ end -}}
+    {{- with index . "isFirst" }}{{ $isFirst = . }}{{ end -}}
+{{- end -}}
+{{- $loading := "lazy" -}}
+{{- $fetchPriority := "auto" -}}
+{{- if $isFirst -}}
+    {{- $loading = "eager" -}}
+    {{- $fetchPriority = "high" -}}
+{{- end -}}
+
 <article>
-    <a href="{{ .RelPermalink }}">
+    <a href="{{ $page.RelPermalink }}">
         <div class="article-details">
             <h2 class="article-title">
-                {{- .Title -}}
+                {{- $page.Title -}}
             </h2>
             <footer class="article-time">
-                <time datetime='{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}'>
-                    {{- .Date | time.Format (or .Site.Params.dateFormat.published "Jan 02, 2006") -}}
+                <time datetime='{{ $page.Date.Format "2006-01-02T15:04:05Z07:00" }}'>
+                    {{- $page.Date | time.Format (or $page.Site.Params.dateFormat.published "Jan 02, 2006") -}}
                 </time>
             </footer>
         </div>
 
-        {{- $image := partial "helper/image" (dict "Image" .Params.image "Resources" .Resources) -}}
+        {{- $image := partial "helper/image" (dict "Image" $page.Params.image "Resources" $page.Resources) -}}
         {{ if $image }}
         <div class="article-image">
             {{ if $image.Resource }}
@@ -22,12 +35,13 @@
                     srcset="{{ $thumb1x.RelPermalink }} 1x, {{ $thumb2x.RelPermalink }} 2x"
                     width="50"
                     height="50"
-                    alt="{{ .Title }}"
-                    loading="lazy"
+                    alt="{{ $page.Title }}"
+                    loading="{{ $loading }}"
+                    fetchpriority="{{ $fetchPriority }}"
                     decoding="async"
                 >
             {{ else }}
-                <img src="{{ $image.Permalink }}" width="50" height="50" alt="{{ .Title }}" loading="lazy" decoding="async">
+                <img src="{{ $image.Permalink }}" width="50" height="50" alt="{{ $page.Title }}" loading="{{ $loading }}" fetchpriority="{{ $fetchPriority }}" decoding="async">
             {{ end }}
         </div>
         {{ end }}

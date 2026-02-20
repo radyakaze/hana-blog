@@ -1,0 +1,11 @@
+{{- $page := . -}}
+{{- $isFirst := false -}}
+{{- if reflect.IsMap . -}}
+    {{- with index . "context" }}{{ $page = . }}{{ end -}}
+    {{- with index . "isFirst" }}{{ $isFirst = . }}{{ end -}}
+{{- end -}}
+
+{{ $image := partial "helper/image" (dict "Image" $page.Params.image "Resources" $page.Resources) }}
+<article class="{{ if $image }}has-image{{ end }}">
+    {{ partial "article/components/header" (dict "context" $page "isFirst" $isFirst) }}
+</article>
