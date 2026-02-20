@@ -4,7 +4,12 @@
         {{ if $image }}
         <div class="article-image">
             {{ if eq .Type "articleList" }}
-                <img src="{{ $image.Permalink }}" width="{{ $image.Width }}" height="{{ $image.Height }}" loading="lazy" alt="Featured image of post {{ .context.Title }}">
+                {{ if $image.Resource }}
+                    {{ $relatedThumb := $image.Resource.Fill "250x150" }}
+                    <img src="{{ $relatedThumb.RelPermalink }}" width="{{ $relatedThumb.Width }}" height="{{ $relatedThumb.Height }}" loading="lazy" alt="Featured image of post {{ .context.Title }}">
+                {{ else }}
+                    <img src="{{ $image.Permalink }}" width="250" height="150" loading="lazy" alt="Featured image of post {{ .context.Title }}">
+                {{ end }}
             {{ else }}
                 {{ partial "helper/responsive-image" (dict
                     "Page" .context
