@@ -58,3 +58,12 @@ SortBy              = "default"
 
     # See all the available configurations at https://github.com/CaiJimmy/hugo-theme-stack/blob/master/config/_default/params.toml
     # Copy the configurations you need from there and paste it here.
+
+[image]
+  widths = [640, 768, 1024]
+  densities = [1, 2]
+  formats = ["webp", "original"]
+  loading = "lazy"
+  render_hook = true
+  class = ""
+  figure_class = ""
