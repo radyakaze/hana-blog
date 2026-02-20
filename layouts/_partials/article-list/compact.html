@@ -15,10 +15,19 @@
         {{ if $image }}
         <div class="article-image">
             {{ if $image.Resource }}
-                {{ $compactThumb := $image.Resource.Fill "120x120" }}
-                <img src="{{ $compactThumb.RelPermalink }}" width="{{ $compactThumb.Width }}" height="{{ $compactThumb.Height }}" alt="{{ .Title }}" loading="lazy" decoding="async">
+                {{ $thumb1x := $image.Resource.Fill "50x50" }}
+                {{ $thumb2x := $image.Resource.Fill "100x100" }}
+                <img
+                    src="{{ $thumb1x.RelPermalink }}"
+                    srcset="{{ $thumb1x.RelPermalink }} 1x, {{ $thumb2x.RelPermalink }} 2x"
+                    width="50"
+                    height="50"
+                    alt="{{ .Title }}"
+                    loading="lazy"
+                    decoding="async"
+                >
             {{ else }}
-                <img src="{{ $image.Permalink }}" width="60" height="60" alt="{{ .Title }}" loading="lazy" decoding="async">
+                <img src="{{ $image.Permalink }}" width="50" height="50" alt="{{ .Title }}" loading="lazy" decoding="async">
             {{ end }}
         </div>
         {{ end }}
