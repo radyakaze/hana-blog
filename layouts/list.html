@@ -53,8 +53,8 @@
     {{ $paginator := partial "helper/paginator.html" . }}
     {{ with $paginator }}
         <section class="article-list--compact">
-            {{ range $index, $page := .Pages }}
-                {{ partial "article-list/compact" (dict "context" $page "isFirst" (eq $index 0)) }}
+            {{ range .Pages }}
+                {{ partial "article-list/compact" . }}
             {{ end }}
         </section>
     {{ end }}
