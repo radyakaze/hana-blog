@@ -61,9 +61,3 @@ SortBy              = "default"
 
 [image]
   widths = [640, 768, 1024]
-  densities = [1, 2]
-  formats = ["webp", "original"]
-  loading = "lazy"
-  render_hook = true
-  class = ""
-  figure_class = ""

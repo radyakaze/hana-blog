@@ -3,11 +3,11 @@
     <a href="{{ .context.RelPermalink }}">
         {{ if $image }}
         <div class="article-image">
-            {{ partial "picture" (dict
-                "ctx" .context
-                "src" .context.Params.image
-                "alt" (printf "Featured image of post %s" .context.Title)
-                "sizes" "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 640px"
+            {{ partial "helper/responsive-image" (dict
+                "Page" .context
+                "Image" .context.Params.image
+                "Alt" (printf "Featured image of post %s" .context.Title)
+                "Sizes" "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 640px"
             ) }}
         </div>
         {{ end }}

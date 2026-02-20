@@ -1,0 +1,66 @@
+{{- $page := .Page -}}
+{{- $imagePath := .Image -}}
+{{- $alt := .Alt | default "" -}}
+{{- $sizes := .Sizes | default "100vw" -}}
+{{- $class := .Class -}}
+
+{{- $image := partial "helper/image" (dict "Image" $imagePath "Resources" $page.Resources) -}}
+{{- if $image -}}
+  {{- $resource := $image.Resource -}}
+  {{- if and $resource (ne $resource.MediaType.SubType "svg") -}}
+    {{- $widths := slice 640 768 1024 -}}
+    {{- with $page.Site.Params.image.widths -}}
+      {{- if reflect.IsSlice . -}}
+        {{- $widths = . -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $srcset := slice -}}
+    {{- $srcsetWebp := slice -}}
+    {{- $scratch := newScratch -}}
+    {{- $scratch.Set "fallback" $resource -}}
+
+    {{- range $widths -}}
+      {{- if le . $resource.Width -}}
+        {{- $imgSized := $resource.Resize (printf "%dx" .) -}}
+        {{- $webpSized := $resource.Resize (printf "%dx webp" .) -}}
+        {{- $srcset = $srcset | append (printf "%s %dw" $imgSized.RelPermalink .) -}}
+        {{- $srcsetWebp = $srcsetWebp | append (printf "%s %dw" $webpSized.RelPermalink .) -}}
+        {{- $scratch.Set "fallback" $imgSized -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- $fallback := $scratch.Get "fallback" -}}
+    {{- if eq (len $srcset) 0 -}}
+      {{- $srcset = $srcset | append (printf "%s %dw" $resource.RelPermalink $resource.Width) -}}
+      {{- $webp := $resource.Resize (printf "%dx webp" $resource.Width) -}}
+      {{- $srcsetWebp = $srcsetWebp | append (printf "%s %dw" $webp.RelPermalink $resource.Width) -}}
+      {{- $fallback = $resource -}}
+    {{- end -}}
+
+    <picture>
+      <source type="image/webp" srcset="{{ delimit $srcsetWebp ", " }}" sizes="{{ $sizes }}">
+      <source type="{{ $resource.MediaType.Type }}/{{ $resource.MediaType.SubType }}" srcset="{{ delimit $srcset ", " }}" sizes="{{ $sizes }}">
+      <img
+        src="{{ $fallback.RelPermalink }}"
+        srcset="{{ delimit $srcset ", " }}"
+        sizes="{{ $sizes }}"
+        width="{{ $fallback.Width }}"
+        height="{{ $fallback.Height }}"
+        loading="lazy"
+        decoding="async"
+        {{ with $class }}class="{{ . }}"{{ end }}
+        alt="{{ $alt }}"
+      >
+    </picture>
+  {{- else -}}
+    <img
+      src="{{ $image.Permalink }}"
+      {{ with $image.Width }}width="{{ . }}"{{ end }}
+      {{ with $image.Height }}height="{{ . }}"{{ end }}
+      loading="lazy"
+      decoding="async"
+      {{ with $class }}class="{{ . }}"{{ end }}
+      alt="{{ $alt }}"
+    >
+  {{- end -}}
+{{- end -}}

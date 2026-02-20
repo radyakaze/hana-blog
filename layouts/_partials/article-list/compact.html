@@ -14,11 +14,11 @@
         {{- $image := partial "helper/image" (dict "Image" .Params.image "Resources" .Resources) -}}
         {{ if $image }}
         <div class="article-image">
-            {{ partial "picture" (dict
-                "ctx" .
-                "src" .Params.image
-                "alt" .Title
-                "sizes" "(max-width: 640px) 100vw, (max-width: 1024px) 40vw, 420px"
+            {{ partial "helper/responsive-image" (dict
+                "Page" .
+                "Image" .Params.image
+                "Alt" .Title
+                "Sizes" "(max-width: 640px) 100vw, (max-width: 1024px) 40vw, 420px"
             ) }}
         </div>
         {{ end }}
