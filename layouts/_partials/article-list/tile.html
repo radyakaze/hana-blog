@@ -1,15 +1,32 @@
 {{ $image := partial "helper/image" (dict "Image" .context.Params.image "Resources" .context.Resources) }}
+{{ $tileSize := .size | default "250x150" }}
+{{ $sizeParts := split $tileSize "x" }}
+{{ $tileW := 250 }}
+{{ $tileH := 150 }}
+{{ if ge (len $sizeParts) 2 }}
+    {{ $tileW = int (index $sizeParts 0) }}
+    {{ $tileH = int (index $sizeParts 1) }}
+{{ end }}
+{{ $isFixedTile := in (slice "articleList" "section" "taxonomy") .Type }}
+
 <article class="{{ if $image }}has-image{{ end }}">
     <a href="{{ .context.RelPermalink }}">
         {{ if $image }}
         <div class="article-image">
-            {{ if eq .Type "articleList" }}
-                {{ if $image.Resource }}
-                    {{ $relatedThumb := $image.Resource.Fill "250x150" }}
-                    <img src="{{ $relatedThumb.RelPermalink }}" width="{{ $relatedThumb.Width }}" height="{{ $relatedThumb.Height }}" loading="lazy" alt="Featured image of post {{ .context.Title }}">
-                {{ else }}
-                    <img src="{{ $image.Permalink }}" width="250" height="150" loading="lazy" alt="Featured image of post {{ .context.Title }}">
-                {{ end }}
+            {{ if and $isFixedTile $image.Resource }}
+                {{ $thumb1x := $image.Resource.Fill (printf "%dx%d" $tileW $tileH) }}
+                {{ $thumb2x := $image.Resource.Fill (printf "%dx%d" (mul $tileW 2) (mul $tileH 2)) }}
+                <img
+                    src="{{ $thumb1x.RelPermalink }}"
+                    srcset="{{ $thumb1x.RelPermalink }} 1x, {{ $thumb2x.RelPermalink }} 2x"
+                    width="{{ $tileW }}"
+                    height="{{ $tileH }}"
+                    loading="lazy"
+                    decoding="async"
+                    alt="Featured image of post {{ .context.Title }}"
+                >
+            {{ else if $isFixedTile }}
+                <img src="{{ $image.Permalink }}" width="{{ $tileW }}" height="{{ $tileH }}" loading="lazy" decoding="async" alt="Featured image of post {{ .context.Title }}">
             {{ else }}
                 {{ partial "helper/responsive-image" (dict
                     "Page" .context
