@@ -22,10 +22,8 @@
         <div class="article-image">
             {{ if and $isFixedTile $image.Resource }}
                 {{ $thumb1x := $image.Resource.Fill (printf "%dx%d" $tileW $tileH) }}
-                {{ $thumb2x := $image.Resource.Fill (printf "%dx%d" (mul $tileW 2) (mul $tileH 2)) }}
                 <img
                     src="{{ $thumb1x.RelPermalink }}"
-                    srcset="{{ $thumb1x.RelPermalink }} 1x, {{ $thumb2x.RelPermalink }} 2x"
                     width="{{ $tileW }}"
                     height="{{ $tileH }}"
                     loading="{{ $loading }}"

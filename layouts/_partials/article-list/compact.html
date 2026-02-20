@@ -29,10 +29,8 @@
         <div class="article-image">
             {{ if $image.Resource }}
                 {{ $thumb1x := $image.Resource.Fill "50x50" }}
-                {{ $thumb2x := $image.Resource.Fill "100x100" }}
                 <img
                     src="{{ $thumb1x.RelPermalink }}"
-                    srcset="{{ $thumb1x.RelPermalink }} 1x, {{ $thumb2x.RelPermalink }} 2x"
                     width="50"
                     height="50"
                     alt="{{ $page.Title }}"
