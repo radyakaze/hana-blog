@@ -2,6 +2,7 @@
 {{- $imagePath := .Image -}}
 {{- $alt := .Alt | default "" -}}
 {{- $class := .Class -}}
+{{- $sizes := .Sizes | default "100vw" -}}
 {{- $priority := .Priority | default false -}}
 {{- $loading := "lazy" -}}
 {{- $fetchPriority := "auto" -}}
@@ -14,55 +15,50 @@
 {{- if $image -}}
   {{- $resource := $image.Resource -}}
   {{- if and $resource (ne $resource.MediaType.SubType "svg") -}}
-    {{- $mobileW := 640 -}}
-    {{- $tabletW := 768 -}}
-    {{- $desktopW := 1024 -}}
-
+    {{- $widths := slice 640 768 1024 -}}
     {{- with $page.Site.Params.image.widths -}}
-      {{- if and (reflect.IsSlice .) (ge (len .) 3) -}}
-        {{- $mobileW = index . 0 -}}
-        {{- $tabletW = index . 1 -}}
-        {{- $desktopW = index . 2 -}}
+      {{- if and (reflect.IsSlice .) (ge (len .) 1) -}}
+        {{- $widths = . -}}
       {{- end -}}
     {{- end -}}
 
-    {{- if lt $resource.Width $mobileW }}{{ $mobileW = $resource.Width }}{{ end -}}
-    {{- if lt $resource.Width $tabletW }}{{ $tabletW = $resource.Width }}{{ end -}}
-    {{- if lt $resource.Width $desktopW }}{{ $desktopW = $resource.Width }}{{ end -}}
+    {{- $srcset := slice -}}
+    {{- $srcsetWebp := slice -}}
+    {{- $scratch := newScratch -}}
+    {{- $scratch.Set "fallback" $resource -}}
 
-    {{- $mobileImg := $resource.Resize (printf "%dx" $mobileW) -}}
-    {{- $tabletImg := $resource.Resize (printf "%dx" $tabletW) -}}
-    {{- $desktopImg := $resource.Resize (printf "%dx" $desktopW) -}}
+    {{- range $widths -}}
+      {{- if and (gt . 0) (le . $resource.Width) -}}
+        {{- $imgSized := $resource.Resize (printf "%dx" .) -}}
+        {{- $webpSized := $resource.Resize (printf "%dx webp" .) -}}
+        {{- $srcset = $srcset | append (printf "%s %dw" $imgSized.RelPermalink .) -}}
+        {{- $srcsetWebp = $srcsetWebp | append (printf "%s %dw" $webpSized.RelPermalink .) -}}
+        {{- $scratch.Set "fallback" $imgSized -}}
+      {{- end -}}
+    {{- end -}}
 
-    {{- $mobileWebp := $resource.Resize (printf "%dx webp" $mobileW) -}}
-    {{- $tabletWebp := $resource.Resize (printf "%dx webp" $tabletW) -}}
-    {{- $desktopWebp := $resource.Resize (printf "%dx webp" $desktopW) -}}
+    {{- if eq (len $srcset) 0 -}}
+      {{- $srcset = $srcset | append (printf "%s %dw" $resource.RelPermalink $resource.Width) -}}
+      {{- $webp := $resource.Resize (printf "%dx webp" $resource.Width) -}}
+      {{- $srcsetWebp = $srcsetWebp | append (printf "%s %dw" $webp.RelPermalink $resource.Width) -}}
+      {{- $scratch.Set "fallback" $resource -}}
+    {{- end -}}
 
+    {{- $fallback := $scratch.Get "fallback" -}}
     {{- $origType := printf "image/%s" $resource.MediaType.SubType -}}
     {{- if in (slice "jpg" "jpeg") $resource.MediaType.SubType -}}
       {{- $origType = "image/jpeg" -}}
     {{- end -}}
 
     <picture>
+      <source type="image/webp" srcset="{{ delimit $srcsetWebp ", " }}" sizes="{{ $sizes }}">
       {{ if ne $origType "image/webp" }}
-        <source media="(max-width: 640px)" type="image/webp" srcset="{{ $mobileWebp.RelPermalink }}">
-        <source media="(max-width: 640px)" type="{{ $origType }}" srcset="{{ $mobileImg.RelPermalink }}">
-
-        <source media="(max-width: 1024px)" type="image/webp" srcset="{{ $tabletWebp.RelPermalink }}">
-        <source media="(max-width: 1024px)" type="{{ $origType }}" srcset="{{ $tabletImg.RelPermalink }}">
-
-        <source media="(min-width: 1025px)" type="image/webp" srcset="{{ $desktopWebp.RelPermalink }}">
-        <source media="(min-width: 1025px)" type="{{ $origType }}" srcset="{{ $desktopImg.RelPermalink }}">
-      {{ else }}
-        <source media="(max-width: 640px)" type="image/webp" srcset="{{ $mobileWebp.RelPermalink }}">
-        <source media="(max-width: 1024px)" type="image/webp" srcset="{{ $tabletWebp.RelPermalink }}">
-        <source media="(min-width: 1025px)" type="image/webp" srcset="{{ $desktopWebp.RelPermalink }}">
+        <source type="{{ $origType }}" srcset="{{ delimit $srcset ", " }}" sizes="{{ $sizes }}">
       {{ end }}
-
       <img
-        src="{{ $desktopImg.RelPermalink }}"
-        width="{{ $desktopImg.Width }}"
-        height="{{ $desktopImg.Height }}"
+        src="{{ $fallback.RelPermalink }}"
+        width="{{ $fallback.Width }}"
+        height="{{ $fallback.Height }}"
         loading="{{ $loading }}"
         fetchpriority="{{ $fetchPriority }}"
         decoding="async"
