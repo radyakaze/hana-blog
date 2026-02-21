@@ -95,27 +95,82 @@ Karena environment build sudah baru, pipeline CSS dipastikan pakai API yang sesu
 
 Ini bikin output stabil dan konsisten buat preload + stylesheet.
 
-## Hardening security headers
+## Hardening security headers + CSP (yang paling penting)
 
-Setelah performa oke, aku lanjut security header. Fokusnya pemisahan jelas: ini buat keamanan, bukan ngejar skor performa.
+Setelah performa oke, aku lanjut ke keamanan. Bagian utama yang aku rapihin adalah **CSP (Content Security Policy)**.
 
-Contoh inti di `_headers`:
+### CSP itu apa?
+
+CSP adalah aturan dari server ke browser tentang sumber resource mana yang boleh dijalankan/dimuat. Tujuannya: mengurangi risiko injeksi script berbahaya (terutama XSS).
+
+Secara praktis, CSP itu seperti whitelist:
+- script boleh dari mana,
+- style boleh dari mana,
+- font boleh dari mana,
+- apakah boleh embed frame atau tidak.
+
+### Yang aku terapkan di blog ini
+
+Karena blog ini static dan minim third-party JS, aku bisa pakai policy cukup ketat:
 
 ```txt
-/*
-  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-  X-Content-Type-Options: nosniff
-  X-Frame-Options: DENY
-  Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self';
+Content-Security-Policy:
+  default-src 'self';
+  base-uri 'self';
+  frame-ancestors 'none';
+  object-src 'none';
+  img-src 'self' data: https:;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' https://fonts.gstatic.com data:;
+  script-src 'self';
+  connect-src 'self';
+  form-action 'self';
+  upgrade-insecure-requests;
 ```
 
-Aset hashed juga dikasih cache panjang:
+Penjelasan singkat directive yang relevan:
+- `default-src 'self'`: baseline semua resource dari origin sendiri.
+- `script-src 'self'`: JS hanya dari domain sendiri (tidak ada JS third-party).
+- `style-src ... https://fonts.googleapis.com`: izinkan stylesheet Google Fonts.
+- `font-src ... https://fonts.gstatic.com`: izinkan file font Google Fonts.
+- `frame-ancestors 'none'`: cegah halaman di-embed oleh situs lain (anti clickjacking).
+- `object-src 'none'`: blok plugin/object legacy yang berisiko.
+
+### Kenapa masih ada `unsafe-inline` di style?
+
+Karena tema masih menghasilkan style inline kecil. Untuk sekarang ini trade-off paling aman agar tampilan tidak pecah sambil tetap ketat di `script-src`.
+
+Untuk script, targetnya tetap bersih: `script-src 'self'` (tanpa third-party script).
+
+### Header keamanan lain yang ikut dipasang
+
+Di file `_headers`, selain CSP aku juga aktifkan:
+
+```txt
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()
+```
+
+Dan untuk aset hashed, cache jangka panjang:
 
 ```txt
 /scss/*
   Cache-Control: public, max-age=31536000, immutable
+/ts/*
+  Cache-Control: public, max-age=31536000, immutable
+/img/*
+  Cache-Control: public, max-age=31536000, immutable
 ```
+
+### Hasilnya gimana?
+
+- Permukaan serangan jadi lebih kecil karena sumber script/style/font lebih terkontrol.
+- Tidak ada JS eksternal yang kebablasan jalan.
+- Font Google tetap render normal karena domainnya explicit di CSP.
+- Konfigurasi lebih mudah diaudit karena aturan security ada di satu tempat (`static/_headers`).
 
 ## Penutup
 
