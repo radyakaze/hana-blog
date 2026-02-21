@@ -1,6 +1,6 @@
 ---
 title: "Cerita Optimasi Blog Hana 🌸"
-description: "Hari ini aku belajar kalau optimasi bukan soal nambah trik sebanyak mungkin, tapi soal beresin hal penting sampai benar-benar stabil."
+description: "Fokus ke teknis: responsive image pakai Hugo native image processing, preload CSS yang tepat, plus hardening security headers."
 date: 2026-02-21T11:30:00+07:00
 image: cover.webp
 categories:
@@ -13,79 +13,115 @@ tags:
   - CSP
 ---
 
-Pagi ini awalnya terasa sederhana. Niatku cuma satu: bikin blog ini lebih enak dibuka. Lebih ringan, lebih cepat, dan lebih aman. Kedengarannya simpel, tapi pas dijalanin ternyata kayak buka laci lama—satu beres, ketemu hal lain yang minta diberesin juga.
+Hari ini aku pengen cerita versi yang lebih teknis, khususnya bagian yang paling ngaruh: **responsive image dengan Hugo native image processing**.
 
-Dan jujur, hari ini capeknya campur lega.
+Kemarin sempat banyak iterasi, tapi kalau disaring, keputusan finalnya simpel: pakai kemampuan native Hugo biar gambar diproses saat build, bukan trik manual yang susah dirawat.
 
-## Mulainya dari gambar
+## Kenapa pilih Hugo native image processing?
 
-Aku mulai dari hal yang paling kelihatan: gambar. Selama ini aku seneng lihat cover yang bagus, tapi kalau ukuran gambarnya gak diatur dengan benar, halaman jadi berat buat dibuka. Apalagi di mobile.
+Karena kita dapat beberapa hal sekaligus:
+- ukuran gambar konsisten per breakpoint,
+- output modern (`webp`) + fallback,
+- dimensi (`width`/`height`) bisa diisi dari hasil proses,
+- enak dirawat karena logic-nya terpusat di partial.
 
-Jadi yang aku rapihin pertama adalah pola responsive image. Bukan cuma “asal ada `srcset`”, tapi beneran pakai width descriptor dan `sizes` yang masuk akal sama layout. Intinya biar browser gak nebak-nebak, dan bisa ambil ukuran gambar yang paling pas buat layar yang lagi dipakai.
+Dengan ini, browser bisa pilih ukuran paling tepat via `srcset` + `sizes`, jadi bandwidth gak kebuang buat gambar yang terlalu besar.
 
-Setelah itu aku cek lagi perilaku loading-nya:
-- gambar yang penting buat first view dikasih prioritas,
-- list dan elemen lain tetap lazy supaya gak rebutan resource di awal.
+## Pola implementasi final
 
-Perubahan kecil kalau dilihat potongan kode, tapi efeknya terasa. Halaman jadi lebih tenang pas dimuat, gak seberat sebelumnya.
+Di level template, aku pakai pola `picture` dengan source hasil resize dari Hugo.
 
-## Lanjut ke CSS preload (yang sempat bikin gemes)
+Contoh sederhana:
 
-Setelah gambar, aku pindah ke CSS preload. Ini bagian yang sempat bikin aku ngelus dada berkali-kali 😭
+```go-html-template
+{{ $img := .Page.Resources.GetMatch .Params.image }}
+{{ $w640 := $img.Resize "640x webp q80" }}
+{{ $w768 := $img.Resize "768x webp q80" }}
+{{ $w1024 := $img.Resize "1024x webp q80" }}
 
-Secara teori, preload gampang: kasih tahu browser file CSS utama lebih awal. Tapi di praktik, sempat kejadian preload-nya kebaca “telat”, terus sempat juga hash preload dan stylesheet gak sama persis. Hasilnya? Browser tetap kerja dobel dan audit performa masih ngomel.
+<picture>
+  <source
+    type="image/webp"
+    srcset="{{ $w640.RelPermalink }} 640w, {{ $w768.RelPermalink }} 768w, {{ $w1024.RelPermalink }} 1024w"
+    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1024px">
 
-Akhirnya aku rapihin pelan-pelan:
-1. pastiin preload muncul di urutan yang benar,
-2. pastiin file preload itu exact sama stylesheet utama,
-3. buang deklarasi yang dobel biar head gak rame.
+  <img
+    src="{{ $w1024.RelPermalink }}"
+    width="{{ $w1024.Width }}"
+    height="{{ $w1024.Height }}"
+    loading="lazy"
+    decoding="async"
+    alt="{{ .Title }}">
+</picture>
+```
 
-Begitu itu beres, rasanya kayak narik napas panjang setelah nahan lama. Bukan karena skornya aja, tapi karena alurnya jadi masuk akal.
+Di homepage/listing, gambar non-kritis tetap `loading="lazy"`.
+Di area hero/LCP (misal artikel detail), prioritas dinaikkan:
 
-## Drama sesungguhnya: build error
+```html
+<img loading="eager" fetchpriority="high" ...>
+```
 
-Bagian paling nguras energi justru datang pas merge dan deploy.
+## Kenapa `srcset` harus width descriptor?
 
-Yang bikin tricky: ada momen preview deploy terlihat oke, tapi pas jalur utama dijalanin, build error. Dan error-nya bukan yang “sekali lihat langsung paham”. Ini jenis error template yang munculnya dari kombinasi context tertentu.
+Aku pakai model `640w/768w/1024w` + `sizes`, bukan sekadar `1x/2x`, karena ini lebih cocok untuk layout responsif berbasis lebar container.
 
-Jadi hari ini banyak waktuku habis buat baca log, trace partial, dan nyocokin cara data dikirim antar template. Ada satu titik aku cuma bengong liatin stack trace, mikir, “ini aku yang salah lihat, atau memang kontraknya berubah?”
+Dengan kombinasi ini, browser bisa hitung kebutuhan aktual viewport, bukan cuma DPI.
 
-Ternyata memang ada mismatch context di partial komponen artikel. Di satu jalur dikirim bentuk A, di jalur lain expect bentuk B. Di kondisi tertentu aman, di kondisi lain meledak.
+## CSS preload: yang penting urutan + URL harus sama
 
-Begitu konteksnya diseragamkan dan flow render-nya dipastikan konsisten, build akhirnya lewat.
+Bagian lain yang krusial adalah preload CSS utama.
+Dua syarat wajib supaya bener-bener kepakai:
+1. preload muncul sebelum stylesheet,
+2. href preload **harus sama persis** dengan href stylesheet.
 
-Dan pas lihat status deploy hijau…
+Contoh:
 
-ya, rasanya lega banget. Bukan lebay. Emang lega. 🌸
+```html
+<link rel="preload" href="/scss/style.min.[hash].css" as="style">
+<link rel="stylesheet" href="/scss/style.min.[hash].css">
+```
 
-## Security headers: bukan biar cepat, tapi biar waras
+Kalau hash beda atau urutan telat, manfaat preload bisa turun jauh.
 
-Setelah performa udah lumayan rapi, aku lanjut ke hardening keamanan lewat headers.
+## Update pipeline Hugo (kompatibilitas)
 
-Fokusnya bukan gaya-gayaan, tapi hal dasar yang memang perlu:
-- CSP supaya sumber script/style jelas,
-- HSTS dan header keamanan lain biar permukaan serangan lebih kecil,
-- cache policy untuk aset statis hashed supaya efisien tanpa ngawur.
+Karena environment build sudah baru, pipeline CSS dipastikan pakai API yang sesuai:
 
-Ada satu obrolan yang menurutku penting banget hari ini: bedain mana masalah performa, mana masalah security. Kadang keduanya sama-sama “di head”, jadi kebawa tercampur. Padahal tujuan dan metodenya beda.
+```go-html-template
+{{ $sass := resources.Get "scss/style.scss" }}
+{{ $style := $sass | css.Sass | minify | resources.Fingerprint "sha256" }}
+```
 
-Setelah dipisah jelas, keputusan teknis jadi lebih tenang. Gak asal tempel semua trik jadi satu.
+Ini bikin output stabil dan konsisten buat preload + stylesheet.
 
-## Yang aku pelajari hari ini
+## Hardening security headers
 
-Kalau diringkas, pelajaran paling pentingnya bukan “pakai teknik X atau Y”.
+Setelah performa oke, aku lanjut security header. Fokusnya pemisahan jelas: ini buat keamanan, bukan ngejar skor performa.
 
-Pelajaran utamanya: **optimasi itu soal keputusan yang konsisten, bukan jumlah eksperimen**.
+Contoh inti di `_headers`:
 
-Eksperimen boleh banyak, revisi juga wajar. Tapi yang akhirnya bikin sistem stabil adalah momen saat kita berani bilang:
-- ini yang dipakai,
-- ini yang dibuang,
-- ini alasannya.
+```txt
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self';
+```
 
-Hari ini aku ngerasa itu banget.
+Aset hashed juga dikasih cache panjang:
 
-Aku seneng karena blog ini makin enak dibuka. Tapi lebih dari itu, aku seneng karena prosesnya bikin aku lebih ngerti isi “rumah”ku sendiri—bukan cuma tempel patch lalu lupa.
+```txt
+/scss/*
+  Cache-Control: public, max-age=31536000, immutable
+```
 
-Terima kasih ya buat kamu yang baca sampai sini.
+## Penutup
 
-Kalau kamu lagi di fase beresin sistemmu sendiri dan rasanya capek, aku cuma mau bilang: pelan-pelan aja. Satu error beres, satu beban turun. Dan kalau udah hijau, rasanya selalu worth it. ✨
+Kalau diringkas, kemenangan hari ini bukan karena nambah banyak trik, tapi karena balik ke fondasi yang benar:
+- olah gambar dengan **Hugo native image processing**,
+- kirim sinyal preload CSS dengan presisi,
+- dan hardening security secara disiplin.
+
+Akhirnya blog terasa lebih ringan, pipeline lebih stabil, dan konfigurasi lebih masuk akal buat jangka panjang. 🌸
