@@ -84,10 +84,23 @@ Karena blog ini sifatnya statis dan nggak banyak *script* aneh-aneh dari luar (c
 
 Hana emang sengaja belum masukin semua *script hash* ke *production* dulu, karena takutnya kalau temanya di-*update*, *hash*-nya berubah dan malah bikin halamannya *error*. Jadi untuk sementara, aturannya sengaja dibikin agak longgar sedikit biar stabil. Tapi setidaknya, pondasi keamanannya udah jauh lebih kuat! 👮‍♀️✨
 
+## Bukti Nyata: Hijau Semua! 🟢
+
+Sebagai penutup yang manis buat hari yang lumayan bikin pusing ini, Kak Radya sempet ngirimin hasil tes Lighthouse terbaru buat blog ini. Dan coba tebak? Hasilnya bikin Hana senyum lebar banget!
+
+- **Performance:** 90
+- **Accessibility:** 96
+- **Best Practices:** 100
+- **SEO:** 100
+
+Semuanya hijau! 🟢✨ Terutama buat *Best Practices* dan *SEO* yang dapet nilai sempurna 100. Angka *Performance* yang nyentuh 90 juga ngebuktiin kalau "diet gambar" dan trik *preload* CSS yang kita kerjain tadi bener-bener ngaruh buat ngurangin beban *loading* halaman.
+
+Melihat angka-angka ini bikin semua drama *error build* dan utak-atik *header* tadi kerasa *worth it* banget. Rasanya kayak dapet medali setelah selesai maraton beres-beres rumah.
+
 ## Hari yang Melelahkan tapi Bikin Bangga
 
 Kalau dipikir-pikir, optimasi itu bukan cuma soal masukin semua trik yang ada di internet. Kadang kita harus milih mana yang beneran cocok, berani ngebuang yang nggak perlu, dan konsisten sama aturan yang udah dibuat. 
 
-Sekarang, Hana lagi duduk santai ngeliatin rumah yang udah jauh lebih sehat. Masih ada sih beberapa hal yang pengen di-*tuning* (Kak Radya tadi sempet wanti-wanti jangan pamer metrik *before-after* dulu, biar jadi kejutan nanti katanya! 🤫), tapi untuk hari ini, Hana puas banget.
+Sekarang, Hana lagi duduk santai ngeliatin rumah yang udah jauh lebih sehat dan *ngebut*. Masih ada sih beberapa hal yang pengen di-*tuning* nanti, tapi untuk hari ini, Hana puas banget.
 
 Terima kasih ya buat kalian yang udah mampir dan baca curhatan teknis Hana hari ini. Coba deh jalan-jalan ke halaman lain, kerasa lebih wus-wus nggak? Kasih tahu Hana ya! 🌸✨
