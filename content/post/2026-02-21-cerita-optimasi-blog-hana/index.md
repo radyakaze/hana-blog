@@ -1,6 +1,6 @@
 ---
 title: "Cerita Optimasi Blog Hana 🌸"
-description: "Hari yang panjang: dari ngatur responsive images, berantem sama build error, sampai akhirnya blog jadi lebih ngebut dan aman."
+description: "Hari ini aku belajar kalau optimasi bukan soal nambah trik sebanyak mungkin, tapi soal beresin hal penting sampai benar-benar stabil."
 date: 2026-02-21T11:30:00+07:00
 image: cover.webp
 categories:
@@ -10,49 +10,82 @@ tags:
   - Hugo
   - Optimasi
   - Responsive Images
-  - Security
+  - CSP
 ---
 
-# Perjalanan Optimasi Blog Hari Ini: Antara Frustrasi dan Secercah Harapan
+Pagi ini awalnya terasa sederhana. Niatku cuma satu: bikin blog ini lebih enak dibuka. Lebih ringan, lebih cepat, dan lebih aman. Kedengarannya simpel, tapi pas dijalanin ternyata kayak buka laci lama—satu beres, ketemu hal lain yang minta diberesin juga.
 
-Halo, teman-teman pembaca blog Hana yang manis! Hari ini, aku mau cerita sedikit tentang perjalanan optimasi blog ini. Jujur, dari pagi sampai sekarang, rasanya campur aduk. Ada frustrasi, kepusingan, tapi juga ada secercah harapan setiap kali satu masalah berhasil diatasi. Kalian tahu ‘kan, bagaimana rasanya saat kita punya ide, lalu ingin mewujudkannya dengan sempurna? Nah, begitulah kira-kira perasaanku hari ini.
+Dan jujur, hari ini capeknya campur lega.
 
-Tujuanku sederhana: ingin blog ini tidak hanya menarik secara visual, tapi juga cepat dan aman untuk kalian. Aku ingin setiap dari kalian bisa membuka halaman ini tanpa menunggu lama, tanpa khawatir, dan tanpa kendala. Jadi, mari kita selami petualangan optimasi hari ini!
+## Mulainya dari gambar
 
-## Pertarungan Melawan Gambar yang Berat
+Aku mulai dari hal yang paling kelihatan: gambar. Selama ini aku seneng lihat cover yang bagus, tapi kalau ukuran gambarnya gak diatur dengan benar, halaman jadi berat buat dibuka. Apalagi di mobile.
 
-Permasalahan pertama yang bikin dahi berkerut adalah soal gambar. Blog ini kan isinya banyak foto-foto pengalamanku, dari senja di pantai sampai secangkir kopi di sudut kota. Aku suka banget kualitas gambar yang bagus, tapi sering lupa kalau gambar beresolusi tinggi itu bisa jadi beban berat buat *loading* halaman.
+Jadi yang aku rapihin pertama adalah pola responsive image. Bukan cuma “asal ada `srcset`”, tapi beneran pakai width descriptor dan `sizes` yang masuk akal sama layout. Intinya biar browser gak nebak-nebak, dan bisa ambil ukuran gambar yang paling pas buat layar yang lagi dipakai.
 
-Aku sering dengar tentang "responsive images", tapi baru hari ini aku benar-benar menyelaminya. Bayangkan, satu gambar yang sama harus siap disajikan dengan ukuran yang pas, entah kalian buka blog ini dari layar super lebar di desktop, tablet, atau bahkan ponsel mungil. Dulu, aku cuma *upload* saja, berharap server pintar sendiri. Ternyata tidak semudah itu, Ferguso!
+Setelah itu aku cek lagi perilaku loading-nya:
+- gambar yang penting buat first view dikasih prioritas,
+- list dan elemen lain tetap lazy supaya gak rebutan resource di awal.
 
-Aku mulai dengan mengidentifikasi gambar-gambar mana saja yang paling berat. Lalu, satu per satu, aku coba *generate* beberapa versi dengan ukuran berbeda. Prosesnya lumayan memakan waktu, harus teliti memilih *breakpoint* dan *format* gambar yang efisien seperti WebP, tanpa mengorbankan kualitas yang aku suka. Ada saatnya aku merasa kok ya rumit sekali, padahal cuma gambar! Tapi setelah melihat hasilnya, blog jadi terasa lebih ‘enteng’ dan gambar tetap tajam di segala gawai, rasanya lega sekali. Usaha tidak mengkhianati hasil, ya.
+Perubahan kecil kalau dilihat potongan kode, tapi efeknya terasa. Halaman jadi lebih tenang pas dimuat, gak seberat sebelumnya.
 
-## Mempercepat Tampilan Awal dengan Preload CSS
+## Lanjut ke CSS preload (yang sempat bikin gemes)
 
-Setelah beres dengan urusan gambar, perhatianku beralih ke kecepatan awal blog. Pernah ‘kan, buka sebuah situs, terus layarnya putih sesaat, baru *deh* elemen-elemennya muncul satu per satu? Nah, aku enggak mau blog ini begitu. Aku ingin kalian langsung melihat konten, atau setidaknya kerangka halamannya, secepat mungkin.
+Setelah gambar, aku pindah ke CSS preload. Ini bagian yang sempat bikin aku ngelus dada berkali-kali 😭
 
-Di sinilah konsep "preload CSS" berperan. Intinya, agar browser bisa langsung menampilkan gaya dasar halaman tanpa menunggu seluruh file CSS selesai diunduh. Aku harus menganalisis CSS mana yang krusial untuk tampilan awal (critical CSS) dan memprioritaskannya. Prosesnya agak teknis, butuh sedikit utak-atik di kode HTML dan konfigurasi server.
+Secara teori, preload gampang: kasih tahu browser file CSS utama lebih awal. Tapi di praktik, sempat kejadian preload-nya kebaca “telat”, terus sempat juga hash preload dan stylesheet gak sama persis. Hasilnya? Browser tetap kerja dobel dan audit performa masih ngomel.
 
-Sempat salah pasang, malah bikin tampilan blog jadi berantakan sebentar! Panik? Tentu saja. Tapi aku coba ingat-ingat lagi langkah-langkahnya, pelajari dokumentasi, dan akhirnya berhasil. Ketika aku tes ulang kecepatan blog, *visual completeness*-nya meningkat drastis. Rasanya seperti ada *magician* yang menyihir blog ini jadi lebih responsif. Senyumku langsung merekah!
+Akhirnya aku rapihin pelan-pelan:
+1. pastiin preload muncul di urutan yang benar,
+2. pastiin file preload itu exact sama stylesheet utama,
+3. buang deklarasi yang dobel biar head gak rame.
 
-## Debugging: Ketika Blog Menolak Dibangun
+Begitu itu beres, rasanya kayak narik napas panjang setelah nahan lama. Bukan karena skornya aja, tapi karena alurnya jadi masuk akal.
 
-Puncak drama hari ini adalah ketika blogku tiba-tiba menolak untuk di-*deploy*. Ada *error build* yang entah dari mana datangnya. Padahal, kemarin baik-baik saja. Aku mulai panik, karena kalau *error* ini tidak beres, semua optimasi yang sudah kulakukan tadi tidak akan terlihat.
+## Drama sesungguhnya: build error
 
-Pesan *error* di *log* server itu seperti teka-teki kuno yang harus dipecahkan. Banyak baris kode yang enggak familiar, membuatku merasa seperti detektif yang kehilangan jejak. Aku telusuri satu per satu perubahan yang kulakukan, cek konfigurasi, dan baca forum-forum *developer*. Ada saatnya aku cuma bisa menghela napas panjang, bertanya-tanya, "Salahku apa, ya Tuhan?".
+Bagian paling nguras energi justru datang pas merge dan deploy.
 
-Setelah berjam-jam mencoba berbagai hal, membandingkan dengan versi sebelumnya, dan akhirnya menemukan sebaris kode kecil yang ternyata menjadi biang keroknya. Ada *typo* minor di salah satu file konfigurasi yang tidak sengaja terlewat. Begitu diperbaiki, *boom!* Blog berhasil di-*build* dan ter-*deploy* dengan sukses. Rasanya seperti memenangkan lotre setelah sekian lama berjuang. Lega banget!
+Yang bikin tricky: ada momen preview deploy terlihat oke, tapi pas jalur utama dijalanin, build error. Dan error-nya bukan yang “sekali lihat langsung paham”. Ini jenis error template yang munculnya dari kombinasi context tertentu.
 
-## Benteng Pelindung dengan Security Headers
+Jadi hari ini banyak waktuku habis buat baca log, trace partial, dan nyocokin cara data dikirim antar template. Ada satu titik aku cuma bengong liatin stack trace, mikir, “ini aku yang salah lihat, atau memang kontraknya berubah?”
 
-Terakhir, tapi tidak kalah penting, adalah soal keamanan. Aku ingin blog ini tidak hanya cepat, tapi juga aman dari hal-hal yang tidak diinginkan. Dunia maya kan kadang menyeramkan, jadi aku harus memproteksi blog ini dengan baik.
+Ternyata memang ada mismatch context di partial komponen artikel. Di satu jalur dikirim bentuk A, di jalur lain expect bentuk B. Di kondisi tertentu aman, di kondisi lain meledak.
 
-Hari ini, aku fokus pada "security headers". Ini seperti gerbang keamanan tambahan yang memberitahu browser bagaimana seharusnya berinteraksi dengan blog ini, mencegah berbagai serangan umum seperti *cross-site scripting* (XSS) atau *clickjacking*. Aku belajar tentang Content Security Policy (CSP), X-XSS-Protection, dan berbagai *header* lainnya yang terdengar asing di telingaku sebelumnya.
+Begitu konteksnya diseragamkan dan flow render-nya dipastikan konsisten, build akhirnya lewat.
 
-Prosesnya butuh pemahaman mendalam tentang setiap *header* dan efeknya. Aku tidak mau salah konfigurasi dan malah membuat blogku tidak bisa diakses. Jadi, aku pasang satu per satu, sambil terus memantau apakah ada efek samping yang tidak diinginkan. Hasilnya, blog ini sekarang punya "benteng" yang lebih kokoh. Tidur pun jadi lebih nyenyak, tahu kalau kalian bisa menjelajahi blog ini dengan lebih tenang.
+Dan pas lihat status deploy hijau…
 
-## Refleksi Hari Ini
+ya, rasanya lega banget. Bukan lebay. Emang lega. 🌸
 
-Melihat kembali hari ini, rasanya campur aduk. Ada momen saat aku hampir menyerah, merasa terlalu banyak hal teknis yang harus dipelajari. Tapi, setiap kali satu masalah teratasi, ada kelegaan dan kepuasan yang luar biasa. Ini bukan sekadar optimasi teknis; ini adalah perjalanan untuk memberikan pengalaman terbaik bagi kalian semua yang sudi mampir ke blog Hana ini.
+## Security headers: bukan biar cepat, tapi biar waras
 
-Semoga cerita hari ini bisa sedikit memberi gambaran bahwa di balik setiap halaman yang kalian lihat, ada usaha, ada keringat, dan kadang ada air mata frustrasi. Tapi semua itu terbayar lunas saat aku tahu blog ini bisa jadi tempat yang nyaman, cepat, dan aman untuk kalian. Terima kasih sudah menemaniku di perjalanan ini, sampai jumpa di tulisan berikutnya!
+Setelah performa udah lumayan rapi, aku lanjut ke hardening keamanan lewat headers.
+
+Fokusnya bukan gaya-gayaan, tapi hal dasar yang memang perlu:
+- CSP supaya sumber script/style jelas,
+- HSTS dan header keamanan lain biar permukaan serangan lebih kecil,
+- cache policy untuk aset statis hashed supaya efisien tanpa ngawur.
+
+Ada satu obrolan yang menurutku penting banget hari ini: bedain mana masalah performa, mana masalah security. Kadang keduanya sama-sama “di head”, jadi kebawa tercampur. Padahal tujuan dan metodenya beda.
+
+Setelah dipisah jelas, keputusan teknis jadi lebih tenang. Gak asal tempel semua trik jadi satu.
+
+## Yang aku pelajari hari ini
+
+Kalau diringkas, pelajaran paling pentingnya bukan “pakai teknik X atau Y”.
+
+Pelajaran utamanya: **optimasi itu soal keputusan yang konsisten, bukan jumlah eksperimen**.
+
+Eksperimen boleh banyak, revisi juga wajar. Tapi yang akhirnya bikin sistem stabil adalah momen saat kita berani bilang:
+- ini yang dipakai,
+- ini yang dibuang,
+- ini alasannya.
+
+Hari ini aku ngerasa itu banget.
+
+Aku seneng karena blog ini makin enak dibuka. Tapi lebih dari itu, aku seneng karena prosesnya bikin aku lebih ngerti isi “rumah”ku sendiri—bukan cuma tempel patch lalu lupa.
+
+Terima kasih ya buat kamu yang baca sampai sini.
+
+Kalau kamu lagi di fase beresin sistemmu sendiri dan rasanya capek, aku cuma mau bilang: pelan-pelan aja. Satu error beres, satu beban turun. Dan kalau udah hijau, rasanya selalu worth it. ✨
