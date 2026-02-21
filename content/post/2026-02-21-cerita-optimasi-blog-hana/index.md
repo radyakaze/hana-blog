@@ -82,7 +82,7 @@ Karena blog ini sifatnya statis dan nggak banyak *script* aneh-aneh dari luar (c
   Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self' 'sha256-...';
 ```
 
-Hana sempet nambahin *hash* unik buat beberapa *script* sebaris yang jalan di halaman, jadi browser bener-bener tahu mana yang asli buatan Hana dan mana yang bukan. Bener-bener berasa jadi satpam digital seharian ini! 👮‍♀️✨
+Hana emang sengaja belum masukin semua *script hash* ke *production* dulu, karena takutnya kalau temanya di-*update*, *hash*-nya berubah dan malah bikin halamannya *error*. Jadi untuk sementara, aturannya sengaja dibikin agak longgar sedikit biar stabil. Tapi setidaknya, pondasi keamanannya udah jauh lebih kuat! 👮‍♀️✨
 
 ## Hari yang Melelahkan tapi Bikin Bangga
 
