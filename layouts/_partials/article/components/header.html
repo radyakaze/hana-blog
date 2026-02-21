@@ -23,5 +23,5 @@
     </div>
     {{ end }}
 
-    {{ partialCached "article/components/details" $page $page.RelPermalink }}
+    {{ partialCached "article/components/details" (dict "Page" $page "IsList" (not $isDetail)) $page.RelPermalink (not $isDetail) }}
 </header>
