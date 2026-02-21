@@ -1,0 +1,65 @@
+{{ $image := partial "helper/image" (dict "Image" .context.Params.image "Resources" .context.Resources) }}
+{{ $tileSize := .size | default "250x150" }}
+{{ $sizeParts := split $tileSize "x" }}
+{{ $tileW := 250 }}
+{{ $tileH := 150 }}
+{{ if ge (len $sizeParts) 2 }}
+    {{ $tileW = int (index $sizeParts 0) }}
+    {{ $tileH = int (index $sizeParts 1) }}
+{{ end }}
+{{ $isFixedTile := in (slice "articleList" "section" "taxonomy") .Type }}
+{{ $isFirst := .isFirst | default false }}
+{{ $loading := "lazy" }}
+{{ $fetchPriority := "auto" }}
+{{ if $isFirst }}
+    {{ $loading = "eager" }}
+    {{ $fetchPriority = "high" }}
+{{ end }}
+
+<article class="{{ if $image }}has-image{{ end }}">
+    <a href="{{ .context.RelPermalink }}">
+        {{ if $image }}
+        <div class="article-image">
+            {{ if and $isFixedTile $image.Resource }}
+                {{ $thumb1x := $image.Resource.Fill (printf "%dx%d" $tileW $tileH) }}
+                {{ $thumb2x := $image.Resource.Fill (printf "%dx%d" (mul $tileW 2) (mul $tileH 2)) }}
+                <img
+                    src="{{ $thumb1x.RelPermalink }}"
+                    srcset="{{ $thumb1x.RelPermalink }} 1x, {{ $thumb2x.RelPermalink }} 2x"
+                    width="{{ $tileW }}"
+                    height="{{ $tileH }}"
+                    loading="{{ $loading }}"
+                    fetchpriority="{{ $fetchPriority }}"
+                    decoding="async"
+                    alt="Featured image of post {{ .context.Title }}"
+                >
+            {{ else if $isFixedTile }}
+                <img src="{{ $image.Permalink }}" width="{{ $tileW }}" height="{{ $tileH }}" loading="{{ $loading }}" fetchpriority="{{ $fetchPriority }}" decoding="async" alt="Featured image of post {{ .context.Title }}">
+            {{ else }}
+                {{ partial "helper/responsive-image" (dict
+                    "Page" .context
+                    "Image" .context.Params.image
+                    "Alt" (printf "Featured image of post %s" .context.Title)
+                    "Sizes" "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 640px"
+                    "Priority" $isFirst
+                ) }}
+            {{ end }}
+        </div>
+        {{ end }}
+
+        <div class="article-details"
+            {{- if and $image $image.Resource -}}
+                {{- $colors := $image.Resource.Colors -}}
+                {{- if $colors -}}
+                    {{- $vibrant := index $colors 0 -}}
+                    {{- $darkMuted := index $colors 1 | default $vibrant -}}
+                    style="background: linear-gradient(0deg, {{ $darkMuted }}80 0%, {{ $vibrant }}C0 100%);"
+                {{- end -}}
+            {{- end -}}
+        >
+            <h2 class="article-title">
+                {{- .context.Title -}}
+            </h2>
+        </div>
+    </a>
+</article>

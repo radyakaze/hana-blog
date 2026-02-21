@@ -1,0 +1,81 @@
+{{- $page := .Page -}}
+{{- $imagePath := .Image -}}
+{{- $alt := .Alt | default "" -}}
+{{- $class := .Class -}}
+{{- $sizes := .Sizes | default "100vw" -}}
+{{- $priority := .Priority | default false -}}
+{{- $loading := "lazy" -}}
+{{- $fetchPriority := "auto" -}}
+{{- if $priority -}}
+  {{- $loading = "eager" -}}
+  {{- $fetchPriority = "high" -}}
+{{- end -}}
+
+{{- $image := partial "helper/image" (dict "Image" $imagePath "Resources" $page.Resources) -}}
+{{- if $image -}}
+  {{- $resource := $image.Resource -}}
+  {{- if and $resource (ne $resource.MediaType.SubType "svg") -}}
+    {{- $widths := slice 640 768 1024 -}}
+    {{- with $page.Site.Params.image.widths -}}
+      {{- if and (reflect.IsSlice .) (ge (len .) 1) -}}
+        {{- $widths = . -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- $srcset := slice -}}
+    {{- $srcsetWebp := slice -}}
+    {{- $scratch := newScratch -}}
+    {{- $scratch.Set "fallback" $resource -}}
+
+    {{- range $widths -}}
+      {{- if and (gt . 0) (le . $resource.Width) -}}
+        {{- $imgSized := $resource.Resize (printf "%dx" .) -}}
+        {{- $webpSized := $resource.Resize (printf "%dx webp" .) -}}
+        {{- $srcset = $srcset | append (printf "%s %dw" $imgSized.RelPermalink .) -}}
+        {{- $srcsetWebp = $srcsetWebp | append (printf "%s %dw" $webpSized.RelPermalink .) -}}
+        {{- $scratch.Set "fallback" $imgSized -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- if eq (len $srcset) 0 -}}
+      {{- $srcset = $srcset | append (printf "%s %dw" $resource.RelPermalink $resource.Width) -}}
+      {{- $webp := $resource.Resize (printf "%dx webp" $resource.Width) -}}
+      {{- $srcsetWebp = $srcsetWebp | append (printf "%s %dw" $webp.RelPermalink $resource.Width) -}}
+      {{- $scratch.Set "fallback" $resource -}}
+    {{- end -}}
+
+    {{- $fallback := $scratch.Get "fallback" -}}
+    {{- $origType := printf "image/%s" $resource.MediaType.SubType -}}
+    {{- if in (slice "jpg" "jpeg") $resource.MediaType.SubType -}}
+      {{- $origType = "image/jpeg" -}}
+    {{- end -}}
+
+    <picture>
+      <source type="image/webp" srcset="{{ delimit $srcsetWebp ", " }}" sizes="{{ $sizes }}">
+      {{ if ne $origType "image/webp" }}
+        <source type="{{ $origType }}" srcset="{{ delimit $srcset ", " }}" sizes="{{ $sizes }}">
+      {{ end }}
+      <img
+        src="{{ $fallback.RelPermalink }}"
+        width="{{ $fallback.Width }}"
+        height="{{ $fallback.Height }}"
+        loading="{{ $loading }}"
+        fetchpriority="{{ $fetchPriority }}"
+        decoding="async"
+        {{ with $class }}class="{{ . }}"{{ end }}
+        alt="{{ $alt }}"
+      >
+    </picture>
+  {{- else -}}
+    <img
+      src="{{ $image.Permalink }}"
+      {{ with $image.Width }}width="{{ . }}"{{ end }}
+      {{ with $image.Height }}height="{{ . }}"{{ end }}
+      loading="{{ $loading }}"
+      fetchpriority="{{ $fetchPriority }}"
+      decoding="async"
+      {{ with $class }}class="{{ . }}"{{ end }}
+      alt="{{ $alt }}"
+    >
+  {{- end -}}
+{{- end -}}

@@ -1,0 +1,82 @@
+{{- $image := partial "helper/image" (dict "Resources" .Page.Resources "Image" .Destination) -}}
+{{- $alt := .PlainText | safeHTML -}}
+{{- $title := .Title | markdownify -}}
+
+{{/* SVG and external images won't work with gallery layout, because their width and height attributes are unknown */}}
+{{- $galleryImage := and $image.Height $image.Width -}}
+
+{{- if and $image $image.Resource (ne $image.Resource.MediaType.SubType "svg") -}}
+    {{- $resource := $image.Resource -}}
+    {{- $widths := slice 640 768 1024 -}}
+    {{- with .Page.Site.Params.image.widths -}}
+        {{- if reflect.IsSlice . -}}
+            {{- $widths = . -}}
+        {{- end -}}
+    {{- end -}}
+
+    {{- $srcset := slice -}}
+    {{- $srcsetWebp := slice -}}
+    {{- $scratch := newScratch -}}
+    {{- $scratch.Set "fallback" $resource -}}
+
+    {{- range $widths -}}
+        {{- if le . $resource.Width -}}
+            {{- $imgSized := $resource.Resize (printf "%dx" .) -}}
+            {{- $webpSized := $resource.Resize (printf "%dx webp" .) -}}
+            {{- $srcset = $srcset | append (printf "%s %dw" $imgSized.RelPermalink .) -}}
+            {{- $srcsetWebp = $srcsetWebp | append (printf "%s %dw" $webpSized.RelPermalink .) -}}
+            {{- $scratch.Set "fallback" $imgSized -}}
+        {{- end -}}
+    {{- end -}}
+
+    {{- $fallback := $scratch.Get "fallback" -}}
+    {{- if eq (len $srcset) 0 -}}
+        {{- $srcset = $srcset | append (printf "%s %dw" $resource.RelPermalink $resource.Width) -}}
+        {{- $webp := $resource.Resize (printf "%dx webp" $resource.Width) -}}
+        {{- $srcsetWebp = $srcsetWebp | append (printf "%s %dw" $webp.RelPermalink $resource.Width) -}}
+        {{- $fallback = $resource -}}
+    {{- end -}}
+
+<picture>
+    <source type="image/webp" srcset="{{ delimit $srcsetWebp ", " }}" sizes="100vw">
+    <source type="{{ $resource.MediaType.Type }}/{{ $resource.MediaType.SubType }}" srcset="{{ delimit $srcset ", " }}" sizes="100vw">
+    <img src="{{ $fallback.RelPermalink }}"
+        srcset="{{ delimit $srcset ", " }}"
+        sizes="100vw"
+        width="{{ $fallback.Width }}"
+        height="{{ $fallback.Height }}"
+        loading="lazy"
+        decoding="async"
+        {{ with $alt }}
+            alt="{{ . }}"
+        {{ end }}
+        {{ with $title }}
+            title="{{ . }}"
+            data-title-escaped="{{ . | htmlEscape }}"
+        {{ end }}
+        {{ if $galleryImage }}
+            class="gallery-image"
+            data-flex-grow="{{ div (mul $image.Width 100) $image.Height }}"
+            data-flex-basis="{{ div (mul $image.Width 240) $image.Height }}px"
+        {{ end }}
+    >
+</picture>
+{{- else -}}
+<img src="{{ $image.Permalink }}"
+	{{ with $image.Width }}width="{{ . }}"{{ end }}
+	{{ with $image.Height }}height="{{ . }}"{{ end }}
+	loading="lazy"
+	{{ with $alt }}
+		alt="{{ . }}"
+	{{ end }}
+    {{ with $title }}
+        title="{{ . }}"
+        data-title-escaped="{{ . | htmlEscape }}"
+    {{ end }}
+	{{ if $galleryImage }}
+		class="gallery-image" 
+		data-flex-grow="{{ div (mul $image.Width 100) $image.Height }}"
+		data-flex-basis="{{ div (mul $image.Width 240) $image.Height }}px"
+	{{ end }}
+>
+{{- end -}}
