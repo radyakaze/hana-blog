@@ -1,9 +1,11 @@
 {{- $page := . -}}
 {{- $isFirst := false -}}
-{{- $isDetail := not (reflect.IsMap .) -}}
+{{- $isDetail := true -}}
 {{- if reflect.IsMap . -}}
     {{- with index . "context" }}{{ $page = . }}{{ end -}}
+    {{- with index . "Page" }}{{ $page = . }}{{ end -}}
     {{- with index . "isFirst" }}{{ $isFirst = . }}{{ end -}}
+    {{- if isset . "IsList" }}{{ $isDetail = not (index . "IsList") }}{{ end -}}
 {{- end -}}
 {{- $priority := or $isFirst $isDetail -}}
 
