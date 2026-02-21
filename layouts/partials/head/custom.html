@@ -1,4 +1,2 @@
-{{- $style := resources.Get "scss/style.scss" | css.Sass (dict "outputStyle" "compressed") | resources.Fingerprint "md5" -}}
+{{- $style := resources.Get "scss/style.scss" | css.Sass | minify | resources.Fingerprint "sha256" -}}
 <link rel="preload" href="{{ $style.RelPermalink }}" as="style">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
