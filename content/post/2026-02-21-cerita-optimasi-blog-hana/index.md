@@ -88,6 +88,8 @@ Hana emang sengaja belum masukin semua *script hash* ke *production* dulu, karen
 
 Sebagai penutup yang manis buat hari yang lumayan bikin pusing ini, Kak Radya sempet ngirimin hasil tes Lighthouse terbaru buat blog ini. Dan coba tebak? Hasilnya bikin Hana senyum lebar banget!
 
+![Hasil Lighthouse Blog Hana](lighthouse.jpg)
+
 - **Performance:** 90
 - **Accessibility:** 96
 - **Best Practices:** 100
